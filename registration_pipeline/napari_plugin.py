@@ -44,6 +44,7 @@ OpticLobeCondition = Literal["none", "left", "right", "both"]
 
 logger = logging.getLogger("registration pipeline")
 
+
 def get_dropdowns_callback(
     dropdowns: dict[str, tuple[type, QComboBox]], viewer: napari.viewer.Viewer
 ) -> Callable:
@@ -270,7 +271,9 @@ def get_steps(  # pylint: disable=too-many-locals, too-many-statements
         if reformat_warp.parent.state != get_dropdown_state(dropdowns, viewer):
             reformat_warp.parent.button.click()
         brp_path = reformat_warp.parent.outputs["moving_path"]
-        image_channels = [l for l in viewer.layers if isinstance(l, napari.layers.Image)]
+        image_channels = [
+            l for l in viewer.layers if isinstance(l, napari.layers.Image)
+        ]
         for image_channel in image_channels:
             moving_path = save_nhdr(image_channel, config.out_dir)
             warp_img = wrap_cmtk.apply_registration(
@@ -280,7 +283,7 @@ def get_steps(  # pylint: disable=too-many-locals, too-many-statements
                 xform=reformat_warp.parent.outputs["warp_xform"],
                 interpolation="cubic",
             )
-            load_nhdr(warp_img, viewer, "Warped"+image_channel.name)
+            load_nhdr(warp_img, viewer, "Warped" + image_channel.name)
         reformat_affine.state = get_dropdown_state(dropdowns, viewer)
 
     reformat_warp.button.clicked.connect(reformat_warp_callback)
@@ -328,44 +331,12 @@ class CMTKRegistrar(QWidget):  # pylint: disable=too-few-public-methods
                 dropdown,
             )
         self.dropdown_callback = get_dropdowns_callback(self.dropdowns, viewer)
-        # self.dropdown_callback(None)
         viewer.layers.events.changed.connect(self.dropdown_callback)
         self.dropdown_callback(None)
-        # add landmark registration button
-        # landmark_button = QPushButton()
-        # landmark_button.setText("fit registration")
-        # # landmark_info_layer_map = {
-        # # li: viewer.layers[self.dropdowns[li.default_layer_name][1].currentText()]
-        # # for li in landmark_infos
-        # # }
-        # self.layout().addSpacing(dropdown_spacing)
-        # self.layout().addWidget(landmark_button)
         self.layout().addSpacing(dropdown_spacing)
         self.steps = get_steps(config, self.dropdowns, image_scale, viewer)
         self.layout().addWidget(self.steps["reformat_landmark"].button)
         self.layout().addSpacing(dropdown_spacing)
-        # self.landmark_affine_path: Path | None = None
-        # self.optic_lobe_condition: OpticLobeCondition | None = None
-        # self.template_image: Path | None = None
-
-        # def landmark_callback():
-        # """
-        # thin wrapper around fit_landmark
-        # """
-        # nonlocal self
-        # nonlocal landmark_info_layer_map
-        # nonlocal config
-        # self.landmark_affine_path, self.optic_lobe_condition = fit_landmark(
-        # config,
-        # landmark_info_layer_map,
-        # dst_landmarks=config.get_landmarks(),
-        # image_scale=image_scale,
-        # )
-        # self.template_image = get_template_image(
-        # config, self.optic_lobe_condition, image_scale
-        # )
-
-        # landmark_button.clicked.connect(landmark_callback)
         self.layout().addWidget(QLabel("Brp channel"))
         dropdown = QComboBox()
         self.layout().addWidget(dropdown)
@@ -375,31 +346,6 @@ class CMTKRegistrar(QWidget):  # pylint: disable=too-few-public-methods
         self.layout().addSpacing(dropdown_spacing)
         self.layout().addWidget(self.steps["reformat_warp"].button)
         self.dropdown_callback(None)
-        # full_registration = QPushButton()
-        # full_registration.setText("Do full registration")
-        # self.layout().addWidget(full_registration)
-
-        # def register_callback():
-        # """
-        # thin wrapper around cmtk_registration
-        # """
-        # nonlocal self
-        # nonlocal viewer
-        # if self.landmark_affine_path is None or self.template_image is None:
-        # raise ValueError("rigid landmark registration not complete")
-        # brp_channel = viewer.layers[self.dropdowns["brp_chan"][1].currentText()]
-        # brp_path = save_nhdr(brp_channel, config.out_dir)
-        # for other_channel in [
-        # l
-        # for l in viewer.layers
-        # if isinstance(l, napari.layers.Image) and l != brp_channel
-        # ]:
-        # _ = save_nhdr(other_channel, config.out_dir)
-        # cmtk_registration(
-        # config, self.landmark_affine_path, brp_path, self.template_image
-        # )
-
-        # full_registration.clicked.connect(register_callback)
 
 
 def get_template_image(
@@ -409,28 +355,6 @@ def get_template_image(
 ) -> Path:
     # TODO determine which template to use
     return config.template_path / "JRC2018_UNISEX_20x_gen1.nhdr"
-
-
-# def cmtk_registration(
-# config: RegistrationConfig,
-# landmark_affine: Path,
-# brp_path: Path,
-# template_image: Path,
-# ):
-# print("applying landmark")
-# wrap_cmtk.apply_registration(config, brp_path, template_image, landmark_affine)
-# print("fitting affine")
-# affine_xform = wrap_cmtk.do_affine_registration(
-# config, brp_path, template_image, landmark_affine
-# )
-# print("applying affine")
-# wrap_cmtk.apply_registration(config, brp_path, template_image, affine_xform)
-# print("fitting warp")
-# warp_xform = wrap_cmtk.do_warp_xform(config, brp_path, template_image, affine_xform)
-# wrap_cmtk.apply_registration(config, brp_path, template_image, warp_xform)
-# print("applying warp")
-# for src_img in brp_path.parent.glob("*.nhdr"):
-# wrap_cmtk.apply_registration(config, src_img, template_image, warp_xform)
 
 
 class WrongPointCountError(Exception):
@@ -493,7 +417,9 @@ def fit_landmark(  # pylint: disable=too-many-locals
         else:
             assert False
     # figure out which landmark is best
-    dst_landmarks_to_compare: landmarks.Landmarks = dst_landmarks.loc[landmark_names, :]#type:ignore
+    dst_landmarks_to_compare: landmarks.Landmarks = dst_landmarks.loc[
+        landmark_names, :
+    ]  # type:ignore
     landmark_affine_paths = [
         config.get_cmtk_transforms_path() / f"landmark-{i}/landmark-affine"
         for i, _ in enumerate(src_landmarks_options)
@@ -599,8 +525,10 @@ def launch_pipeline(
         "ndim": 3,
     }
     for landmark_info in landmark_infos:
-        viewer.add_points(name=landmark_info.default_layer_name, **add_points_kwargs)
-
+        points = viewer.add_points(
+            name=landmark_info.default_layer_name, **add_points_kwargs
+        )
+        points.mode = "add"
     viewer.window.add_dock_widget(
         CMTKRegistrar(viewer, landmark_infos, config, image_layer.scale)
     )

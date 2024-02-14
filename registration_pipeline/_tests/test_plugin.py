@@ -144,7 +144,9 @@ def test_steps(make_napari_viewer):
         )
         steps["reformat_warp"].button.click()
         assert sum(1 for _ in temp_dir.glob("**/*")) == 29
-        image_channels = [l for l in viewer.layers if isinstance(l, napari.layers.Image)]
+        image_channels = [
+            l for l in viewer.layers if isinstance(l, napari.layers.Image)
+        ]
         assert len(image_channels) == 2
 
     with TemporaryDirectory() as temp_dir_str:
