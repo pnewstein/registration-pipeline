@@ -1,0 +1,26 @@
+name: reg-pipe
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - napari
+  - attrs
+  - numpy
+  - pynrrd
+  - pyqt
+  - pip
+  - napari-3d-counter
+  - morphops>0.1.11
+  - h5py>=3.1
+  - morphops>=0.1.11
+  - numpy>=1.20
+  - pandas>=1.0
+  - setuptools>=50.6
+  - tqdm>=4.45
+  - typing-extensions>=3.7.4
+  - scipy
+  - fuzzywuzzy>=0.18
+  - matplotlib>=3.2
+  - networkx>=2.4
+  - seaborn>=0.10
+  - napari-segment-blobs-and-things-with-membranes

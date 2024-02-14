@@ -1,0 +1,38 @@
+[project]
+name = "registration-pipeline"
+version = "0.0.1"
+dependencies = [
+  "napari",
+  "attrs",
+  "pytest",
+  "numpy",
+  "scipy",
+  "pynrrd",
+  "xform",
+  "static-frame==2.2.3",
+  "pandas",
+  "napari-czifile2@git+https://github.com/pnewstein/napari-czifile2",
+  "napari-scripts@git+https://github.com/pnewstein/napari-scripts",
+]
+requires-python = ">=3.9"
+authors = [
+  {name = "Peter Newstein", email = "peternewstein@gmail.com"},
+]
+description = "A pipeline for registering drosophila brains to the janelia template"
+readme = "README.md"
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Programming Language :: Python",
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "Intended Audience :: Science/Research"
+]
+
+[poject.optional-dependencies]
+testing = [
+    "tox",
+    "pytest",  # https://docs.pytest.org/en/latest/contents.html
+    "pytest-cov",  # https://pytest-cov.readthedocs.io/en/latest/
+    "pytest-qt",  # https://pytest-qt.readthedocs.io/en/latest/
+    "napari",
+    "pyqt5"
+]
