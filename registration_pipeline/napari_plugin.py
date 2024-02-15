@@ -99,6 +99,24 @@ def get_dropdown_state(
     )
 
 
+def gen_colors(n_colors: int):
+    """
+    generates n_colors number of colors that look
+    ok against a gray background
+
+    expected to be ziped with a iterable of length n_colors
+    """
+    if n_colors == 1:
+        yield from ["green"]
+    elif n_colors == 2:
+        yield from ["green", "magenta"]
+    elif n_colors == 3:
+        yield from ["green", "red", "blue"]
+    else:
+        while True:
+            yield "gray"
+
+
 def get_steps(  # pylint: disable=too-many-locals, too-many-statements
     config: RegistrationConfig,
     dropdowns: dict[str, tuple[type, QComboBox]],
@@ -271,10 +289,27 @@ def get_steps(  # pylint: disable=too-many-locals, too-many-statements
         if reformat_warp.parent.state != get_dropdown_state(dropdowns, viewer):
             reformat_warp.parent.button.click()
         brp_path = reformat_warp.parent.outputs["moving_path"]
-        image_channels = [
-            l for l in viewer.layers if isinstance(l, napari.layers.Image)
+        brp_channel = viewer.layers[dropdowns["brp_chan"][1].currentText()]
+        warp_img = wrap_cmtk.apply_registration(
+            config,
+            moving_path=brp_path,
+            fixed_path=reformat_warp.parent.outputs["fixed_path"],
+            xform=reformat_warp.parent.outputs["warp_xform"],
+            interpolation="cubic",
+        )
+        load_nhdr(warp_img, viewer, "Warped" + brp_channel.name)
+
+        other_channels = [
+            l
+            for l in viewer.layers
+            if isinstance(l, napari.layers.Image)
+            and "xformed" not in l.name
+            and "Warped" not in l.name
+            and l != brp_channel
         ]
-        for image_channel in image_channels:
+        for image_channel, color in zip(
+            other_channels, gen_colors(len(other_channels))
+        ):
             moving_path = save_nhdr(image_channel, config.out_dir)
             warp_img = wrap_cmtk.apply_registration(
                 config,
@@ -283,7 +318,12 @@ def get_steps(  # pylint: disable=too-many-locals, too-many-statements
                 xform=reformat_warp.parent.outputs["warp_xform"],
                 interpolation="cubic",
             )
-            load_nhdr(warp_img, viewer, "Warped" + image_channel.name)
+            load_nhdr(
+                warp_img,
+                viewer,
+                "Warped" + image_channel.name,
+                load_kwargs={"blending": "additive", "colormap": color},
+            )
         reformat_affine.state = get_dropdown_state(dropdowns, viewer)
 
     reformat_warp.button.clicked.connect(reformat_warp_callback)
@@ -328,7 +368,7 @@ class CMTKRegistrar(QWidget):  # pylint: disable=too-few-public-methods
             dropdown.setCurrentText(landmark_info.default_layer_name)
             self.dropdowns[landmark_info.default_layer_name] = (
                 napari.layers.Points,
-                dropdown,
+                dropdn_colors,
             )
         self.dropdown_callback = get_dropdowns_callback(self.dropdowns, viewer)
         viewer.layers.events.changed.connect(self.dropdown_callback)
@@ -574,17 +614,22 @@ def save_nhdr(
 
 
 def load_nhdr(
-    path: Path, viewer: napari.viewer.Viewer, layer_name: str | None = None
+    path: Path,
+    viewer: napari.viewer.Viewer,
+    layer_name: str | None = None,
+    load_kwargs: dict[str, str] | None = None,
 ) -> napari.layers.Layer:
     """
     loads a nhdr file respecting the scale
     """
     if layer_name is None:
         layer_name = path.with_suffix("").name
+    if load_kwargs is None:
+        load_kwargs = {}
     data, header = nrrd.read(str(path))
 
     scale = np.diag(header["space directions"])[::-1]
     logger.info("Adding layer %s", layer_name)
     return viewer.add_image(
-        data.transpose(2, 1, 0), scale=scale, rgb=False, name=layer_name
+        data.transpose(2, 1, 0), scale=scale, rgb=False, name=layer_name, **load_kwargs
     )

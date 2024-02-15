@@ -94,7 +94,10 @@ def get_dropdowns(viewer: napari.viewer.Viewer) -> dict[str, tuple[type, QComboB
     dropdown = QComboBox()
     dropdowns["brp_chan"] = (napari.layers.Image, dropdown)
     dropdown.addItem("S00 AF647-T2")
-    viewer.add_image(name="S00 AF647-T2", data=get_image_from_coords(src_landmarks))
+    image = viewer.add_image(
+        name="S00 AF647-T2", data=get_image_from_coords(src_landmarks)
+    )
+    viewer.add_image(name="S00 488-T2", data=np.random.uniform(size=image.data.shape))
     return dropdowns
 
 
@@ -144,11 +147,7 @@ def test_steps(make_napari_viewer):
             test_config, dropdowns, np.array([1, 1, 1]), viewer
         )
         steps["reformat_warp"].button.click()
-        assert sum(1 for _ in temp_dir.glob("**/*")) == 29
-        image_channels = [
-            l for l in viewer.layers if isinstance(l, napari.layers.Image)
-        ]
-        assert len(image_channels) == 2
+        assert sum(1 for _ in temp_dir.glob("**/*")) == 33
 
     with TemporaryDirectory() as temp_dir_str:
         temp_dir = Path(temp_dir_str)
@@ -183,6 +182,15 @@ def test_load_nhdr(make_napari_viewer):
     assert out_layer.name == "small"
 
 
+def test_gen_colors():
+    assert tuple(napari_plugin.gen_colors(1)) == ("green",)
+    assert tuple(napari_plugin.gen_colors(2)) == ("green", "magenta")
+    assert tuple(napari_plugin.gen_colors(3)) == ("green", "red", "blue")
+    assert (
+        tuple(c for c, _ in zip(napari_plugin.gen_colors(10), range(10)))
+        == ("gray",) * 10
+    )
+
+
 if __name__ == "__main__":
-    # test_fit_affine()
     test_steps(napari.viewer.Viewer)
