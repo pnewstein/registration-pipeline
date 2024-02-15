@@ -66,6 +66,7 @@ def get_rand_landmarks() -> landmarks.Landmarks:
 
 
 def make_test_template(template_path: Path):
+    template_path.mkdir(exist_ok=True)
     eg_landmarks = get_rand_landmarks()
     eg_landmarks.to_csv(template_path / "landmarks.csv")
     image = get_image_from_coords(eg_landmarks)
