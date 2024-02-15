@@ -219,7 +219,7 @@ def get_steps(  # pylint: disable=too-many-locals, too-many-statements
     fit_affine.button.clicked.connect(fit_affine_callback)
     # setup reformat affine
     reformat_affine = Step(
-        QPushButton("View landmark transformed"), fit_affine, {}, tuple()
+        QPushButton("View affine transformed"), fit_affine, {}, tuple()
     )
 
     def reformat_affine_callback():
