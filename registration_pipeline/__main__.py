@@ -19,30 +19,6 @@ plugin docked
 Index is zero based
 """
 
-def find_cmtk() -> Path | None:
-    """
-    returns the cmtk executable or None if it cannot be found
-    """
-    search_path = [p for p in os.environ["PATH"].split(os.pathsep) if len(p) > 0]
-    search_path += ['~/bin',
-                    '/usr/lib/cmtk/bin/',
-                    '/usr/local/lib/cmtk/bin',
-                    '/usr/local/bin/cmtk/bin',
-                    '/opt/local/bin',
-                    '/opt/local/bin/cmtk/bin',
-                    '/Applications/IGSRegistrationTools/bin']
-    if platform.system() == "Windows":
-        search_path += [r'C:\cygwin64\usr\local\lib\cmtk\bin',
-                        r'C:\Program Files\CMTK-3.3\CMTK\lib\cmtk\bin',
-                        r'C:\Program Files\CMTK-3.3\CMTK\bin',]
-    for path_str in search_path:
-        path = Path(path_str)
-        if not path.is_dir():
-            continue
-        try:
-            return next(path.glob("cmtk"))
-        except StopIteration:
-            continue
 
     
 @click.command(help=HELP_MESSAGE)
@@ -134,7 +110,7 @@ def main(
     viewer = ns.get_viewer_at_czi_scene(czi_path, index, False)
     config = registration_config.RegistrationConfig(
         template_path=template_path,
-        cmtk_exe=cmtk_path,
+        cmtk_exe_dir=cmtk_path,
         out_dir=out_dir,
         ncpu=ncpu
     )

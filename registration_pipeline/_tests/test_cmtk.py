@@ -38,7 +38,7 @@ src_landmarks = landmarks.from_array_and_names(
 
 config = registration_config.RegistrationConfig(
     template_path=DATA_DIR / "template.nhdr",
-    cmtk_exe=Path("/opt/local/bin/cmtk"),
+    cmtk_exe_dir=registration_config.find_cmtk(),
     out_dir=DATA_DIR,
     ncpu=8,
 )

@@ -32,7 +32,7 @@ from registration_pipeline.landmarks import (
     Landmarks,
     LandmarkInfo,
 )
-from registration_pipeline.registration_config import RegistrationConfig
+from registration_pipeline.registration_config import RegistrationConfig, find_cmtk
 
 # from registration_pipeline.itk_rigid_landmark import (
 # rigid_landmark_tranform,
@@ -480,7 +480,7 @@ def test_lanch_pipeline():
     viewer = ns.get_viewer_at_czi_scene(czi_file, 0)
     config = RegistrationConfig(
         template_path=Path().home() / "templates/JRC2018_UNISEX",
-        cmtk_exe=Path("/opt/local/bin/cmtk"),
+        cmtk_exe_dir=find_cmtk(),
         out_dir=Path("out0"),
         ncpu=8,
     )

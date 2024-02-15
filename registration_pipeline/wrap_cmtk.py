@@ -36,8 +36,7 @@ def do_landmark_registration(
     dst_landmarks_path.write_text(landmarks.to_cmtk(dst_landmarks), "utf-8")
     # note: we need to register dst to src because this function returns the inverse of the affine
     args = (
-        config.cmtk_exe,
-        cmtk_command,
+        config.get_cmtk_exe(cmtk_command),
         "--rigid",
         dst_landmarks_path,
         src_landmarks_path,
@@ -66,8 +65,7 @@ def do_affine_registration(
     out = config.get_cmtk_transforms_path() / "affine-xform"
     cmtk_command = "registration"
     args = (
-        config.cmtk_exe,
-        cmtk_command,
+        config.get_cmtk_exe(cmtk_command),
         "--threads",
         str(config.ncpu),
         "--initial",
@@ -85,14 +83,6 @@ def do_affine_registration(
     return out
 
 
-# def do_initial_affine(config, moving_path, fixed_path) -> Path:
-# out = config.get_cmtk_transforms_path() / "init-affine"
-# cmtk_command = "make_initial_affine"
-# args = (config.cmtk_exe, cmtk_command, "--threads", str(config.ncpu), "--principal_axes", fixed_path, moving_path, out)
-# run(args, **RUN_KWARGS)
-# return out
-
-
 def do_warp_xform(
     config: RegistrationConfig, moving_path: Path, fixed_path: Path, affine: Path
 ) -> Path:
@@ -102,8 +92,7 @@ def do_warp_xform(
     cmtk_command = "warp"
     out = config.get_cmtk_transforms_path() / "warp-xform"
     args = (
-        config.cmtk_exe,
-        cmtk_command,
+        config.get_cmtk_exe(cmtk_command),
         "--threads",
         str(config.ncpu),
         "-o",
@@ -149,8 +138,7 @@ def apply_registration(
     out = config.out_dir / f"{xform.name}-imgs" / moving_path.name
     cmtk_command = "reformatx"
     args = (
-        config.cmtk_exe,
-        cmtk_command,
+        config.get_cmtk_exe(cmtk_command),
         f"--{interpolation}",
         "--outfile",
         out,
