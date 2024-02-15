@@ -180,9 +180,7 @@ def test_load_nhdr(make_napari_viewer):
     napari_plugin.save_nhdr(test_layer, DATA_DIR, "small.nhdr")
     napari_plugin.load_nhdr(DATA_DIR / "small.nhdr", viewer)
     out_layer = viewer.layers[0]
-    print(out_layer)
-    print(out_layer.data)
-    print(out_layer.scale)
+    assert out_layer.name == "small"
 
 
 if __name__ == "__main__":

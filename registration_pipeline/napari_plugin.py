@@ -580,9 +580,9 @@ def load_nhdr(
     loads a nhdr file respecting the scale
     """
     if layer_name is None:
-        layer_name = path.name
+        layer_name = path.with_suffix("").name
     data, header = nrrd.read(str(path))
 
     scale = np.diag(header["space directions"])[::-1]
     logger.info("Adding layer %s", layer_name)
-    return viewer.add_image(data.transpose(2, 1, 0), scale=scale, rgb=False)
+    return viewer.add_image(data.transpose(2, 1, 0), scale=scale, rgb=False, name=layer_name)
