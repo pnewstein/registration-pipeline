@@ -6,6 +6,7 @@ from __future__ import annotations
 from subprocess import run
 from pathlib import Path
 from typing import Literal
+import logging
 
 from xform import CMTKtransform
 import numpy as np
@@ -13,6 +14,7 @@ import numpy as np
 from registration_pipeline.registration_config import RegistrationConfig
 from registration_pipeline import landmarks
 
+logger = logging.getLogger("registration pipeline")
 
 RUN_KWARGS = {"check": True, "capture_output": False}
 
@@ -42,6 +44,7 @@ def do_landmark_registration(
         src_landmarks_path,
         out,
     )
+    logger.info("running %s", args)
     run(args, **RUN_KWARGS)
     # calculate registration quality
     calc_dst_points = (-CMTKtransform(out)).xform(
@@ -79,6 +82,7 @@ def do_affine_registration(
         fixed_path,
         moving_path,
     )
+    logger.info("running %s", args)
     run(args, **RUN_KWARGS)
     return out
 
@@ -117,6 +121,7 @@ def do_warp_xform(
         fixed_path,
         moving_path,
     )
+    logger.info("running %s", args)
     run(args, **RUN_KWARGS)
     return out
 
@@ -147,5 +152,6 @@ def apply_registration(
         fixed_path,
         xform,
     )
+    logger.info("running %s", args)
     run(args, **RUN_KWARGS)
     return out
