@@ -90,6 +90,17 @@ def main(
             sys.exit(1)
     else:
         out_dir = Path(out_dir)
+    if template_path is None:
+        template_path = Path().home() / "templates/JRC2018_UNISEX"
+        if not template_path.exists():
+            print(
+                f"{template_path} does not exist. Please specify the path to the "
+                "template directory using the --template-path option",
+                file=sys.stderr,
+            )
+    else:
+        template_path = Path(template_path)
+    from registration_pipeline.registration_config import find_cmtk
     if cmtk_path is None:
         cmtk_path = find_cmtk()
         if cmtk_path is None:
@@ -101,16 +112,6 @@ def main(
             sys.exit(1)
     else:
         cmtk_path = Path(cmtk_path)
-    if template_path is None:
-        template_path = Path().home() / "templates/JRC2018_UNISEX"
-        if not template_path.exists():
-            print(
-                f"{template_path} does not exist. Please specify the path to the "
-                "template directory using the --template-path option",
-                file=sys.stderr,
-            )
-    else:
-        template_path = Path(template_path)
 
     # launch the pipeline
     # import napari if things havent failed

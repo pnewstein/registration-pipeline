@@ -367,7 +367,7 @@ class CMTKRegistrar(QWidget):  # pylint: disable=too-few-public-methods
             dropdown.setCurrentText(landmark_info.default_layer_name)
             self.dropdowns[landmark_info.default_layer_name] = (
                 napari.layers.Points,
-                dropdn_colors,
+                dropdown,
             )
         self.dropdown_callback = get_dropdowns_callback(self.dropdowns, viewer)
         viewer.layers.events.changed.connect(self.dropdown_callback)
