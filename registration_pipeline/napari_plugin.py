@@ -185,7 +185,7 @@ def get_steps(  # pylint: disable=too-many-locals, too-many-statements
             xform=reformat_landmark.parent.outputs["landmark_affine_path"],
             interpolation="nn",
         )
-        load_nhdr(out, viewer, "Landmark xfomed")
+        load_nhdr(out, viewer, "Landmark xformed")
         reformat_landmark.state = get_dropdown_state(dropdowns, viewer)
 
     reformat_landmark.button.clicked.connect(reformat_landmark_callback)
