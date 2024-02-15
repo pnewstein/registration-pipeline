@@ -104,4 +104,6 @@ class RegistrationConfig:
         return out
 
     def get_cmtk_exe(self, exe: str):
-        return next(self.cmtk_exe_dir.glob(f"{exe}*"))
+        if os.name == "nt":
+            return self.cmtk_exe_dir / f"{exe}.exe"
+        return self.cmtk_exe_dir / exe

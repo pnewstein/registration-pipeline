@@ -252,7 +252,6 @@ def get_steps(  # pylint: disable=too-many-locals, too-many-statements
         """
         prepares and calls wrap_cmtk.do_warp_xform
         """
-        print("running_fit_warp")
         nonlocal fit_warp
         nonlocal viewer
         nonlocal dropdowns
