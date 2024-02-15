@@ -20,23 +20,23 @@ Index is zero based
 """
 
 
-    
 @click.command(help=HELP_MESSAGE)
 @click.argument("czi-path", type=click.Path(exists=True))
 @click.argument("index", type=int)
 @click.option(
     "-n",
     "--ncpu",
-    help=("Number of CPU cores to use in CMTK commands. "
-          "Defaults to all cores"),
+    help=("Number of CPU cores to use in CMTK commands. Defaults to all cores"),
     required=False,
 )
 @click.option(
     "-o",
     "--out-dir",
-    help=("The directory where all output and intermediate files will be "
-          "stored. Defaults to a newly created folder in the working "
-          "directory"),
+    help=(
+        "The directory where all output and intermediate files will be "
+        "stored. Defaults to a newly created folder in the working "
+        "directory"
+    ),
     required=False,
     type=click.Path(),
 )
@@ -60,7 +60,7 @@ def main(
     ncpu: int | None,
     out_dir: str | Path | None,
     cmtk_path: str | Path | None,
-    template_path: str | Path | None
+    template_path: str | Path | None,
 ):
     """
     cli of the program
@@ -68,14 +68,20 @@ def main(
     # resolve arguemnts
     czi_path = Path(czi_path)
     if czi_path.suffix != ".czi":
-        print(f"Only CZI files are accepted. {czi_path} does "
-              "not appear to be a czi file", file=sys.stderr)
+        print(
+            f"Only CZI files are accepted. {czi_path} does "
+            "not appear to be a czi file",
+            file=sys.stderr,
+        )
         sys.exit(1)
     if ncpu is None:
         ncpu = os.cpu_count()
         if ncpu is None:
-            print("Could not determine the number of CPUs. Please pass the number "
-                  "of CPUs you want to use using the --ncpu option", file=sys.stderr)
+            print(
+                "Could not determine the number of CPUs. Please pass the number "
+                "of CPUs you want to use using the --ncpu option",
+                file=sys.stderr,
+            )
             sys.exit(1)
     if out_dir is None:
         out_dir = Path(".") / f"{czi_path.name}-{index:03d}"
@@ -87,32 +93,39 @@ def main(
     if cmtk_path is None:
         cmtk_path = find_cmtk()
         if cmtk_path is None:
-            print("CMTK not found. Please install from https://www.nitrc.org/projects/cmtk\n"
-                  "then add to path or specify installed path with the --cmtk-path option", 
-                  file=sys.stderr)
+            print(
+                "CMTK not found. Please install from https://www.nitrc.org/projects/cmtk\n"
+                "then add to path or specify installed path with the --cmtk-path option",
+                file=sys.stderr,
+            )
             sys.exit(1)
     else:
         cmtk_path = Path(cmtk_path)
     if template_path is None:
         template_path = Path().home() / "templates/JRC2018_UNISEX"
         if not template_path.exists():
-            print(f"{template_path} does not exist. Please specify the path to the "
-                  "template directory using the --template-path option", file=sys.stderr)
+            print(
+                f"{template_path} does not exist. Please specify the path to the "
+                "template directory using the --template-path option",
+                file=sys.stderr,
+            )
     else:
         template_path = Path(template_path)
 
     # launch the pipeline
     # import napari if things havent failed
-    from registration_pipeline import napari_plugin, registration_config, landmarks# pylint: disable=import-outside-toplevel
-    import napari_scripts as ns # pylint: disable=import-outside-toplevel
+    from registration_pipeline import (
+        napari_plugin,
+        registration_config,
+        landmarks,
+    )  # pylint: disable=import-outside-toplevel
+    import napari_scripts as ns  # pylint: disable=import-outside-toplevel
     import napari
+
     print(f"loading {czi_path}")
     viewer = ns.get_viewer_at_czi_scene(czi_path, index, False)
     config = registration_config.RegistrationConfig(
-        template_path=template_path,
-        cmtk_exe_dir=cmtk_path,
-        out_dir=out_dir,
-        ncpu=ncpu
+        template_path=template_path, cmtk_exe_dir=cmtk_path, out_dir=out_dir, ncpu=ncpu
     )
     napari_plugin.launch_pipeline(viewer, landmarks.landmark_infos, config)
     napari.run()

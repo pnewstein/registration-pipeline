@@ -585,4 +585,6 @@ def load_nhdr(
 
     scale = np.diag(header["space directions"])[::-1]
     logger.info("Adding layer %s", layer_name)
-    return viewer.add_image(data.transpose(2, 1, 0), scale=scale, rgb=False, name=layer_name)
+    return viewer.add_image(
+        data.transpose(2, 1, 0), scale=scale, rgb=False, name=layer_name
+    )

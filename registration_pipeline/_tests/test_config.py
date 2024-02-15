@@ -9,10 +9,7 @@ import numpy as np
 DATA_DIR = Path(__file__).parent / "data"
 DATA_DIR.mkdir(exist_ok=True)
 
-from registration_pipeline.registration_config import (
-    RegistrationConfig,
-    find_cmtk
-)
+from registration_pipeline.registration_config import RegistrationConfig, find_cmtk
 import registration_pipeline._tests as tests
 
 tests.test_plugin.make_test_template(DATA_DIR / "test_template")
@@ -28,6 +25,7 @@ config = RegistrationConfig(
 def test_get_landmarks():
     landmarks = config.get_landmarks()
     assert isinstance(landmarks.index[0], np.str_)
+
 
 def test_find_cmtk():
     out = find_cmtk()
