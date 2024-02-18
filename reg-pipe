@@ -1,0 +1,2 @@
+#!/bin/zsh
+micromamba run -n reg-pipe python -m registration_pipeline "$@"
