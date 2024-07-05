@@ -4,7 +4,7 @@ This code uses napari to set up registration and view results
 
 from __future__ import annotations
 from pathlib import Path
-from typing import Callable, Literal, Any
+from typing import Callable, Any
 from itertools import chain
 from copy import deepcopy
 import re
@@ -32,15 +32,18 @@ from registration_pipeline.landmarks import (
     Landmarks,
     LandmarkInfo,
 )
-from registration_pipeline.registration_config import RegistrationConfig, find_cmtk
+from registration_pipeline.registration_config import (
+    RegistrationConfig,
+    find_cmtk,
+    # optic_lobe_condition,
+    OpticLobeCondition,
+)
 
 # from registration_pipeline.itk_rigid_landmark import (
 # rigid_landmark_tranform,
 # score_affine,
 # )
 from registration_pipeline import wrap_cmtk, landmarks
-
-OpticLobeCondition = Literal["none", "left", "right", "both"]
 
 logger = logging.getLogger("registration pipeline")
 
@@ -142,7 +145,7 @@ def get_steps(  # pylint: disable=too-many-locals, too-many-statements
         nonlocal config
         nonlocal dropdowns
         nonlocal viewer
-        logger.info("staring landmark callback")
+        logger.info("starting landmark callback")
         landmark_affine_path, optic_lobe_condition = fit_landmark(
             config,
             landmark_info_layer_map,
@@ -173,7 +176,7 @@ def get_steps(  # pylint: disable=too-many-locals, too-many-statements
         nonlocal reformat_landmark
         nonlocal viewer
         nonlocal dropdowns
-        logger.info("staring reformat_landmark callback")
+        logger.info("starting reformat_landmark callback")
         if reformat_landmark.parent is None:
             assert False
         if reformat_landmark.parent.state != get_dropdown_state(dropdowns, viewer):
@@ -199,7 +202,7 @@ def get_steps(  # pylint: disable=too-many-locals, too-many-statements
         nonlocal fit_affine
         nonlocal viewer
         nonlocal dropdowns
-        logger.info("staring fit_affine callback")
+        logger.info("starting fit_affine callback")
         if fit_affine.parent is None:
             assert False
         if fit_affine.parent.state != get_dropdown_state(dropdowns, viewer):
@@ -574,7 +577,7 @@ def launch_pipeline(
 
 
 def save_nhdr(
-    image_layer: napari.layers.Image, out_dir: Path, file_name: str | None = None
+    image_layer: napari.layers.Image, out_dir: Path, file_name: str | Path | None = None
 ) -> Path:
     """
     saves image layer to path return file saved

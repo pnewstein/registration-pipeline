@@ -1,4 +1,4 @@
-name: reg-pipe2
+name: reg-pipe
 channels:
   - conda-forge
 dependencies:
