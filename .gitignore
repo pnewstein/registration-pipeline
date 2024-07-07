@@ -1,0 +1,4 @@
+*.nhdr
+*.raw.gz
+**/__pycache__
+registration_pipeline.egg-info/
