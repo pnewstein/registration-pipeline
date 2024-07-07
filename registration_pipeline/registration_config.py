@@ -36,6 +36,8 @@ def find_cmtk() -> Path | None:
     search_path = [Path(p) for p in os.environ["PATH"].split(os.pathsep) if len(p) > 0]
     search_path += [
         Path().home() / "bin",
+        Path().home() / "bin/cmtk/bin",
+        Path().home() / "bin/cmtk/lib/cmtk/bin",
         Path().home() / "Downloads/usr/lib/cmtk/bin",
         Path("/usr/lib/cmtk/bin/"),
         Path("/usr/local/lib/cmtk/bin"),

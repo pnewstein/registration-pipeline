@@ -8,6 +8,8 @@ import io
 from subprocess import run
 import gzip
 import zlib
+from functools import reduce
+from operator import mul
 
 import numpy as np
 from attr import evolve
@@ -15,7 +17,6 @@ import napari
 
 from registration_pipeline.registration_config import (
     TemplateImageInfo,
-    OpticLobeCondition,
     find_cmtk,
     RegistrationConfig,
 )
@@ -49,6 +50,21 @@ kinds: domain domain domain
 labels: "x" "y" "z"'''
 
 
+def main():
+    viewer = napari.viewer.Viewer()
+    viewer.open("JRC2018_UNISEX_38um_iso_16bit.nrrd")
+    template_image = viewer.layers[0]
+    template_image.scale = (0.38, 0.38, 0.38)
+    template_path = Path().home() / "templates/JRC2018_UNISEX/"
+    os.chdir(template_path)
+    left_mask = load_mask(Path("left.mask"))
+    right_mask = load_mask(Path("right.mask"))
+    dims = [(0.5189161, 0.5189161, 1.0), (0.1, 0.1, 0.2)]
+    ol_conditions = ["none", "left", "right", "both"]
+    tiis = [TemplateImageInfo(*dim, olc) for olc in ol_conditions for dim in dims]
+    make_images(template_image, left_mask, right_mask, tiis)
+
+
 def save_mask(data: np.ndarray, path: Path) -> int:
     """
     saves a mask in a compressed form
@@ -78,7 +94,7 @@ def load_mask(path: Path) -> np.ndarray:
     shape = np.frombuffer(shape_bytes, dtype="<u8")
     packed_array = np.frombuffer(buffer.read(), dtype=np.uint8)
     out = np.unpackbits(packed_array).reshape(shape)
-    return out
+    return out.astype(bool)
 
 
 def test_example():
@@ -99,11 +115,18 @@ def test_example():
     ol_conditions = ["none", "left", "right", "both"]
     dims = [(0.5189161, 0.5189161, 1.0), (0.38, 0.38, 0.38), (0.1, 0.1, 0.2)]
     tiis = [TemplateImageInfo(*dim, olc) for olc in ol_conditions for dim in dims]
-    for layer in viewer.layers:
-        if layer.name[0] == 3:
-            layer.scale = (0.38, 0.38, 0.38)
-        else:
-            layer.scale = (1, 0.5189161, 0.5189161)
+    make_images(template, left_mask, right_mask, tiis)
+    # for layer in viewer.layers:
+    # if layer.name[0] == 3:
+    # layer.scale = (0.38, 0.38, 0.38)
+    # else:
+    # layer.scale = (1, 0.5189161, 0.5189161)
+
+
+"""
+& C:/Users/Admin/bin/cmtk/lib/cmtk/bin/reformatx.exe --threads 10 --dofs 6,9 --accuracy 0.8 -o test-affine 380_380_380_both.nhdr affine.380_380_380_both.nhdr
+
+"""
 
 
 def make_images(
@@ -128,6 +151,7 @@ def make_images(
     Path("original-path").write_text(str(template_tii.to_path()), "utf-8")
     # handle optic lobes on original image
     for ol_condition in np.unique([tii.optic_lobe_condition for tii in tiis]):
+        print(f"masking {ol_condition}")
         data = template.data.copy()
         if ol_condition == "both":
             pass
@@ -161,11 +185,13 @@ def make_images(
             yscale=tii.y_scale,
             zscale=tii.z_scale,
         )
-        new_raw_size = np.prod(scaled_pix)
+        new_raw_size = reduce(mul, scaled_pix.tolist())
+        print(new_raw_size, old_raw_size)
         if new_raw_size > old_raw_size:
             new_array = bytes(new_raw_size * 2)
             ziped_bytes = gzip.compress(new_array)
             dummy_raw_path.write_bytes(ziped_bytes)
+            old_raw_size = new_raw_size
         fixed_path = Path("fixed_path")
         fixed_path.write_text(out_header)
         floating_tii = evolve(
@@ -182,7 +208,12 @@ def make_images(
             fixed_path,
             xform_path,
         )
+        print(f"interpolating {tii}")
         run(args, check=True)
     xform_path.unlink()
     dummy_raw_path.unlink()
     fixed_path.unlink()
+
+
+if __name__ == "__main__":
+    main()
