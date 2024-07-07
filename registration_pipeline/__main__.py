@@ -101,6 +101,7 @@ def main(
     else:
         template_path = Path(template_path)
     from registration_pipeline.registration_config import find_cmtk
+
     if cmtk_path is None:
         cmtk_path = find_cmtk()
         if cmtk_path is None:
