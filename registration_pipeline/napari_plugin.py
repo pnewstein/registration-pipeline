@@ -35,7 +35,8 @@ from registration_pipeline.landmarks import (
 from registration_pipeline.registration_config import (
     RegistrationConfig,
     find_cmtk,
-    # optic_lobe_condition,
+    get_appropriate_image_path,
+    TemplateImageInfo,
     OpticLobeCondition,
 )
 
@@ -395,9 +396,23 @@ def get_template_image(
     optic_lobe_condition: OpticLobeCondition,
     image_scale: np.ndarray,
 ) -> Path:
-    # TODO determine which template to use
-    return config.template_path / "JRC2018_UNISEX_20x_gen1.nhdr"
+    """
+    finds the right template image
 
+    image_scale is in zyx
+    """
+    # must be floats not np.float64
+    scale_list = [float(e) for e in image_scale.tolist()]
+    out = get_appropriate_image_path(
+        config.template_path, 
+        TemplateImageInfo(
+            z_scale=scale_list[0],
+            y_scale=scale_list[1],
+            x_scale=scale_list[2],
+            optic_lobe_condition=optic_lobe_condition
+        )
+    )
+    return out
 
 class WrongPointCountError(Exception):
     """
@@ -521,7 +536,7 @@ def test_lanch_pipeline():
     )
     viewer = ns.get_viewer_at_czi_scene(czi_file, 0)
     config = RegistrationConfig(
-        template_path=Path().home() / "templates/JRC2018_UNISEX",
+        template_path=Path().home() / "templates/real_templates/JRC2018_UNISEX",
         cmtk_exe_dir=find_cmtk(),
         out_dir=Path("out0"),
         ncpu=8,

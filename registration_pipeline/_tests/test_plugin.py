@@ -72,9 +72,9 @@ def make_test_template(template_path: Path):
     image = get_image_from_coords(eg_landmarks)
     layer = napari.layers.Image(data=image)
     napari_plugin.save_nhdr(
-        layer, template_path, file_name="JRC2018_UNISEX_20x_gen1.nhdr"
+        layer, template_path, file_name="100_100_100_both.nhdr"
     )
-    napari_plugin.save_nhdr(layer, template_path, file_name="JRC2018_UNISEX.nhdr")
+    (template_path / "original-path").write_text("100_100_100_both.nhdr")
 
 
 def get_dropdowns(viewer: napari.viewer.Viewer) -> dict[str, tuple[type, QComboBox]]:
@@ -140,6 +140,16 @@ def test_steps(make_napari_viewer):
     dropdowns = get_dropdowns(viewer)
     with TemporaryDirectory() as temp_dir_str:
         temp_dir = Path(temp_dir_str)
+        make_test_template(temp_dir)
+        test_config = evolve(config, template_path=temp_dir, out_dir=temp_dir)
+        steps = napari_plugin.get_steps(
+            test_config, dropdowns, np.array([1, 1, 1]), viewer
+        )
+        steps["reformat_landmark"].button.click()
+        assert sum(1 for _ in temp_dir.glob("**/*")) == 18
+
+    with TemporaryDirectory() as temp_dir_str:
+        temp_dir = Path(temp_dir_str)
         print(temp_dir)
         make_test_template(temp_dir)
         test_config = evolve(config, template_path=temp_dir, out_dir=temp_dir)
@@ -147,7 +157,7 @@ def test_steps(make_napari_viewer):
             test_config, dropdowns, np.array([1, 1, 1]), viewer
         )
         steps["reformat_warp"].button.click()
-        assert sum(1 for _ in temp_dir.glob("**/*")) == 33
+        assert sum(1 for _ in temp_dir.glob("**/*")) == 32
 
     with TemporaryDirectory() as temp_dir_str:
         temp_dir = Path(temp_dir_str)
@@ -157,17 +167,8 @@ def test_steps(make_napari_viewer):
             test_config, dropdowns, np.array([1, 1, 1]), viewer
         )
         steps["reformat_affine"].button.click()
-        assert sum(1 for _ in temp_dir.glob("**/*")) == 24
+        assert sum(1 for _ in temp_dir.glob("**/*")) == 23
 
-    with TemporaryDirectory() as temp_dir_str:
-        temp_dir = Path(temp_dir_str)
-        make_test_template(temp_dir)
-        test_config = evolve(config, template_path=temp_dir, out_dir=temp_dir)
-        steps = napari_plugin.get_steps(
-            test_config, dropdowns, np.array([1, 1, 1]), viewer
-        )
-        steps["reformat_landmark"].button.click()
-        assert sum(1 for _ in temp_dir.glob("**/*")) == 19
 
 
 def test_load_nhdr(make_napari_viewer):
