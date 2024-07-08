@@ -96,6 +96,11 @@ def test_gaip_end(dummy_templates):
     out_path = get_appropriate_image_path(dummy_templates, moving_tii)
     assert out_path.name == "100_100_200_both.nhdr"
 
+def test_serialize():
+    file = Path(tempfile.gettempdir()) / "config.json"
+    config.to_file(file)
+    new_config = RegistrationConfig.from_file(file)
+    assert new_config == config
 
 if __name__ == "__main__":
-    test_gaip_end(dummy_templates())
+    test_serialize()

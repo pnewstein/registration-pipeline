@@ -7,7 +7,9 @@ from pathlib import Path
 from typing import Literal, get_args, cast
 import platform
 import os
+import json
 import re
+from typing import get_type_hints
 
 import nrrd
 from attrs import frozen, field
@@ -126,6 +128,28 @@ class RegistrationConfig:
         if os.name == "nt":
             return self.cmtk_exe_dir / f"{exe}.exe"
         return self.cmtk_exe_dir / exe
+
+    @classmethod
+    def from_file(cls, path: Path) -> RegistrationConfig:
+        """
+        loads config from a file
+        """
+        json_dict = json.loads(path.read_text("utf-8"))
+        if json_dict["version"] != 0:
+            raise ValueError("Invalid file")
+        del json_dict["version"]
+        hints = get_type_hints(cls)
+        json_dict = {k: hints[k](v) for k, v in json_dict.items()}
+        return cls(**json_dict)
+
+    def to_file(self, path: Path):
+        """
+        saved config to a file
+        """
+        json_dict = asdict(self)
+        json_dict = {k: str(v) for k, v in json_dict.items()}
+        json_dict["version"] = 0
+        path.write_text(json.dumps(json_dict, indent=4), "utf-8")
 
 
 @frozen()
