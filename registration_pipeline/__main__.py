@@ -164,7 +164,8 @@ def main(
             sys.exit(1)
     else:
         cmtk_path = Path(cmtk_path)
-
+    # add to path for xform to work properly
+    os.environ["PATH"] += os.pathsep + str(cmtk_path.resolve())
     # launch the pipeline
     # import napari if things havent failed
     from registration_pipeline import ( # pylint: disable=import-outside-toplevel
