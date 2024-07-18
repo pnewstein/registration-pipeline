@@ -7,10 +7,9 @@ from pathlib import Path
 import os
 import sys
 from typing import cast
-import platform
 
 import click
-
+import xform
 
 HELP_MESSAGE = """
 Starts the registration pipeline using the czi file at
@@ -165,7 +164,7 @@ def main(
     else:
         cmtk_path = Path(cmtk_path)
     # add to path for xform to work properly
-    os.environ["PATH"] += os.pathsep + str(cmtk_path.resolve())
+    xform.transforms.cmtk._cmtkbin = cmtk_path
     # launch the pipeline
     # import napari if things havent failed
     from registration_pipeline import ( # pylint: disable=import-outside-toplevel
@@ -182,6 +181,7 @@ def main(
     if save_config:
         config_path.parent.mkdir(parents=True, exist_ok=True)
         config.to_file(config_path)
+    print(config.get_cmtk_transforms_path())
     napari_plugin.launch_pipeline(viewer, landmarks.landmark_infos, config)
     napari.run()
 

@@ -7,6 +7,9 @@ from subprocess import run
 from pathlib import Path
 from typing import Literal
 import logging
+import os
+
+from pathlib import PurePosixPath
 
 from xform import CMTKtransform
 import numpy as np
@@ -16,7 +19,24 @@ from registration_pipeline import landmarks
 
 logger = logging.getLogger("registration pipeline")
 
-RUN_KWARGS = {"check": True, "capture_output": False}
+
+def run_args(args: list[str | Path]):
+    """
+    runs arguments in cygwin or linux
+    """
+    if os.name == "nt":
+        cygwin_args: list[str | Path] = []
+        for arg in args:
+            if isinstance(arg, str):
+                cygwin_args.append(arg)
+                continue
+            win_path = arg.resolve()
+            cygwin_path = PurePosixPath("/cygdrive", win_path.parts[0][0].lower(), *(win_path.parts[1:]))
+            cygwin_args.append(f"'{cygwin_path}'")
+        shell_script = " ".join(cygwin_args)
+        run([Path("C:/cygwin64/bin/bash.exe"), "-cil", shell_script], check=True)
+    else:
+        run(args, check=True, capture_output=False)
 
 
 def do_landmark_registration(
@@ -45,7 +65,7 @@ def do_landmark_registration(
         out,
     )
     logger.info("running %s", args)
-    run(args, **RUN_KWARGS)
+    run_args(args)
     # calculate registration quality
     calc_dst_points = (-CMTKtransform(out)).xform(
         landmarks.to_array_and_names(src_landmarks, False)[0]
@@ -83,7 +103,7 @@ def do_affine_registration(
         moving_path,
     )
     logger.info("running %s", args)
-    run(args, **RUN_KWARGS)
+    run_args(args)
     return out
 
 
@@ -122,7 +142,7 @@ def do_warp_xform(
         moving_path,
     )
     logger.info("running %s", args)
-    run(args, **RUN_KWARGS)
+    run_args(args)
     return out
 
 
@@ -153,5 +173,5 @@ def apply_registration(
         xform,
     )
     logger.info("running %s", args)
-    run(args, **RUN_KWARGS)
+    run_args(args)
     return out

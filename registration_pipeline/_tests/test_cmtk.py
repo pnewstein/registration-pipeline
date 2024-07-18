@@ -9,6 +9,7 @@ from tempfile import TemporaryDirectory
 import numpy as np
 from scipy.spatial.transform import Rotation
 from xform import CMTKtransform
+import xform
 import napari
 import shutil
 import nrrd
@@ -17,6 +18,7 @@ from attrs import evolve
 from registration_pipeline import wrap_cmtk, landmarks, registration_config
 from registration_pipeline.napari_plugin import save_nhdr
 
+xform.transforms.cmtk._cmtkbin = registration_config.find_cmtk()
 
 DATA_DIR = Path(__file__).parent / "data"
 

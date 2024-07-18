@@ -5,7 +5,7 @@ Some tests for the plugin portion of the pipeline
 from typing import get_args
 from pathlib import Path
 from typing import get_args
-import shutil
+import xform
 from tempfile import TemporaryDirectory
 import logging
 
@@ -16,7 +16,7 @@ from qtpy.QtWidgets import QComboBox, QWidget
 from attrs import evolve
 
 from registration_pipeline import landmarks, napari_plugin, registration_config
-
+xform.transforms.cmtk._cmtkbin = registration_config.find_cmtk()
 logger = logging.getLogger("registration pipeline")
 logging.basicConfig(level="INFO")
 
