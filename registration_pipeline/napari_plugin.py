@@ -11,7 +11,6 @@ import re
 import logging
 
 from static_frame import Frame
-import napari_scripts as ns
 import napari
 import numpy as np
 from attrs import define
@@ -534,7 +533,6 @@ def test_lanch_pipeline():
     czi_file = r"/Users/petern/Documents/tmp/20-8-12_39504\ vnd_embryo\ immort_adult_HA,\ V5,\ nc82_slide\ 1.czi".replace(
         "\\", ""
     )
-    viewer = ns.get_viewer_at_czi_scene(czi_file, 0)
     config = RegistrationConfig(
         template_path=Path().home() / "templates/real_templates/JRC2018_UNISEX",
         cmtk_exe_dir=find_cmtk(),
@@ -599,8 +597,13 @@ def save_nhdr(
     """
     out_dir.mkdir(exist_ok=True)
     if not file_name:
-        scene, fluor, _ = ns.parse_channel_name(image_layer.name)
-        if scene is not None:
+        regex_match = re.match(r"^raw-(.+)-channel$", image_layer.name)
+        if regex_match is None:
+            fluor: str | None = None
+        else:
+            fluor = regex_match.group(1)
+        scene = image_layer.metadata.get("scene_index")
+        if scene is not None and fluor is not None:
             file_name = f"{scene.strip()}-{fluor}.nhdr"
         else:
             file_name = re.sub(r'[<>:"/\\|?*]', "_", image_layer.name) + ".nhdr"

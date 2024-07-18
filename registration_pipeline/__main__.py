@@ -174,7 +174,7 @@ def main(
     import napari_scripts as ns  # pylint: disable=import-outside-toplevel
     import napari # pylint: disable=import-outside-toplevel
     print(f"loading {czi_path}")
-    viewer = ns.get_viewer_at_czi_scene(czi_path, index, False)
+    viewer = ns.get_viewer_from_file(czi_path, index)
     config = RegistrationConfig(
         template_path=template_path, cmtk_exe_dir=cmtk_path, out_dir=out_dir, ncpu=ncpu
     )
