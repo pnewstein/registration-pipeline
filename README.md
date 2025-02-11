@@ -1,6 +1,6 @@
 # registration-pipeline
 
-A pipeline to warp *Drosophila* brain images to a template.
+A pipeline to warp *Drosophila* brain images to a template. Work in progress
 
 Uses napari
 
